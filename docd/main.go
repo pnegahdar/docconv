@@ -1,14 +1,14 @@
 package main
 
 import (
+	"cloud.google.com/go/errorreporting"
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-
-	"cloud.google.com/go/errorreporting"
 
 	"github.com/gorilla/mux"
 
@@ -20,6 +20,7 @@ var (
 	listenAddr = flag.String("addr", ":8888", "The address to listen on (e.g. 127.0.0.1:8888)")
 
 	inputPath = flag.String("input", "", "The file path to convert and exit; no server")
+	apiKey    = os.Getenv("API_KEY")
 
 	errorReporting                 = flag.Bool("error-reporting", false, "Whether or not to enable GCP Error Reporting")
 	errorReportingGCPProjectID     = flag.String("error-reporting-gcp-project-id", "", "The GCP project to use for Error Reporting")
@@ -90,6 +91,9 @@ func main() {
 func serve(er internal.ErrorReporter, cs *convertServer) {
 	r := mux.NewRouter()
 	r.HandleFunc("/convert", cs.convert)
+	if apiKey == "" {
+		log.Fatal(errors.New("API_KEY not set"))
+	}
 
 	// Start webserver
 	log.Println("Setting log level to", *logLevel)

@@ -50,6 +50,12 @@ func WithProtocol(protocol string) Opt {
 	}
 }
 
+func WithApiKey(apiKey string) Opt {
+	return func(c *Client) {
+		c.apiKey = apiKey
+	}
+}
+
 // New creates a new docconv client for interacting with a docconv HTTP
 // server.
 func New(opts ...Opt) *Client {
@@ -68,6 +74,7 @@ func New(opts ...Opt) *Client {
 // Client is a docconv HTTP client.  Use New to make new Clients.
 type Client struct {
 	endpoint   string
+	apiKey     string
 	protocol   string
 	httpClient *http.Client
 }
@@ -96,7 +103,11 @@ func (c *Client) Convert(r io.Reader, filename string) (*Response, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%v%v/convert", c.protocol, c.endpoint), buf)
+	url := fmt.Sprintf("%v%v/convert", c.protocol, c.endpoint)
+	if c.apiKey != "" {
+		url = fmt.Sprintf("%v?api_key=%v", url, c.apiKey)
+	}
+	req, err := http.NewRequest("POST", url, buf)
 	if err != nil {
 		return nil, err
 	}

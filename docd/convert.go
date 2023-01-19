@@ -23,6 +23,17 @@ type convertServer struct {
 func (s *convertServer) convert(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	providedApiKey := r.URL.Query().Get("apiKey")
+	if providedApiKey == "" {
+		s.clientError(ctx, w, r, http.StatusBadRequest, "apiKey is required")
+		return
+	}
+
+	if providedApiKey != apiKey {
+		s.clientError(ctx, w, r, http.StatusUnauthorized, "invalid api key")
+		return
+	}
+
 	// Readability flag. Currently only used for HTML
 	var readability bool
 	if r.FormValue("readability") == "1" {
