@@ -23,7 +23,7 @@ type convertServer struct {
 func (s *convertServer) convert(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	providedApiKey := r.URL.Query().Get("apiKey")
+	providedApiKey := r.URL.Query().Get("api_key")
 	if providedApiKey == "" {
 		s.clientError(ctx, w, r, http.StatusBadRequest, "apiKey is required")
 		return
